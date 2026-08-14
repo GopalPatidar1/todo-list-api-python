@@ -1,20 +1,15 @@
-import os
-
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from app.config.secretes import secretes
 
-
-DB_URL = os.getenv("DB_URL")
-
-if not DB_URL:
+if not secretes.DB_URL:
     raise RuntimeError("DB_URL environment variable is not set")
-
 
 class Base(DeclarativeBase):
     pass
 
 engine = create_engine(
-    DB_URL,
+    secretes.DB_URL,
     pool_pre_ping=True,
 )
 

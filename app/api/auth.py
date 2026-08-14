@@ -8,7 +8,6 @@ router = APIRouter(prefix='/auth', tags=[
     'Authentication'
 ])
 
-
 @router.post('/login')
 def login(request: UserLogin, db:Session= Depends(get_db)):
     return auth.userLogin(request, db)

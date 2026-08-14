@@ -3,13 +3,8 @@ from app.repositories import user as userRepo
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
-import os
+from app.config.secretes import secretes
 import jwt
-
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-
 
 def registerUser(request, db):
     try:
@@ -38,15 +33,15 @@ def registerUser(request, db):
 
 def createAccessToken(userId: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
-        minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES)
+        minutes=int(secretes.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
     payload = { "userId": str(userId), "exp": expire }
 
     return jwt.encode(
         payload,
-        JWT_SECRET_KEY,
-        algorithm=JWT_ALGORITHM
+        secretes.JWT_SECRET_KEY,
+        algorithm=secretes.JWT_ALGORITHM
     )
 
 def userLogin(request, db):

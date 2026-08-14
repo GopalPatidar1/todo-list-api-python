@@ -1,18 +1,15 @@
-from dotenv import load_dotenv
-load_dotenv()
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.api import todolist, auth, user
 from app.config import database
 from app.config.database import Base, engine
 import app.models
+from app.config.secretes import secretes
 import jwt
-import os
 Base.metadata.create_all(bind=engine)
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
-
+JWT_SECRET_KEY = secretes.JWT_SECRET_KEY
+JWT_ALGORITHM = secretes.JWT_ALGORITHM
 
 app = FastAPI()
 
