@@ -13,7 +13,7 @@ def getTodolist(db: Session, userId: str, nextCursor: int | None, limit:int):
 
     if nextCursor is not None:
         filterRec.append(TodoList.id <= nextCursor)
-# join() / outerjoin() control the SQL rows you query; selectinload() controls how SQLAlchemy loads related objects.
+        # join() / outerjoin() control the SQL rows you query; selectinload() controls how SQLAlchemy loads related objects.
     result =  db.scalars(
         select(TodoList)
         # // Used to eagerly load a related object/relationship using a separate SQL query, so accessing the relationship does not cause additional queries for each record.
@@ -28,6 +28,7 @@ def getTodolist(db: Session, userId: str, nextCursor: int | None, limit:int):
     ).all()
     nextCursor = result[-1].id if result else None
     availNext = len(result) > limit
+
     return {"nextCursor": nextCursor, "availNext":availNext ,"result": result[:limit]}
 
 def deleteTodo(todoId: str, userId: str, db: Session):
@@ -38,10 +39,7 @@ def deleteTodo(todoId: str, userId: str, db: Session):
 
     db.commit()
 
-    if result.rowcount == 0:
-        return False
-
-    return True
+    return result
 
 def updateTodoItem(db:Session, todoId:str, userId: str, data):
      result = db.execute(

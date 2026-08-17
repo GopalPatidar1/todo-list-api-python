@@ -15,9 +15,3 @@ def login(request: UserLogin, db:Session= Depends(get_db)):
 @router.post('/register')
 def registerUser(request: CreateUser, db: Session = Depends(get_db)):
     return auth.registerUser(request, db)
-
-@router.post('/logout')
-def logout():   
-    return {
-        'message': 'Logout successful'
-    }   

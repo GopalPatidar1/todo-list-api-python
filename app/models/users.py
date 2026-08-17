@@ -4,6 +4,7 @@ from enum import Enum
 from sqlalchemy import String, DateTime, func, Enum as SQLEnum
 from sqlalchemy.orm import DeclarativeBase ,Mapped, mapped_column, relationship
 from app.config.database import Base
+import bcrypt
 
 class UserStatus(str, Enum):
     ACTIVE = "active"
@@ -15,7 +16,30 @@ class User(Base):
     firstname: Mapped[str] = mapped_column(String(30), nullable=False)
     lastname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     email: Mapped[str] = mapped_column(String(255), index=True, nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String(30))
+
+    password_hash: Mapped[str] = mapped_column(
+        "password",
+        String(500),
+        nullable=False
+    )
+
+    @property
+    def password(self) -> str:
+        return self.password_hash
+
+    @password.setter
+    def password(self, value: str) -> None:
+        self.password_hash = bcrypt.hashpw(
+            value.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+    def verify_password_hash(self, password: str) -> bool:
+        return bcrypt.checkpw(
+            password.encode("utf-8"),
+            self.password_hash.encode("utf-8")
+        )
+
     status: Mapped[UserStatus] = mapped_column(SQLEnum(UserStatus), default=UserStatus.ACTIVE, nullable=False)
 
     todos: Mapped[list["TodoList"]] = relationship(

@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.api import todolist, auth, user
 from app.config import database
@@ -6,6 +6,7 @@ from app.config.database import Base, engine
 import app.models
 from app.config.secretes import secretes
 import jwt
+from app.core.customException import CustomException
 Base.metadata.create_all(bind=engine)
 
 JWT_SECRET_KEY = secretes.JWT_SECRET_KEY
@@ -54,3 +55,12 @@ async def read_root():
     return {
         'Hello': 'World'
     }
+
+@app.exception_handler(CustomException)
+async def global_exception_handler(request: Request, exc: CustomException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            'error': exc.message
+        }
+    )

@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
 from app.config.secretes import secretes
+from app.core.customException import CustomException
 import jwt
 
 def registerUser(request, db):
@@ -25,11 +26,10 @@ def registerUser(request, db):
           "name": user.firstname,
           "email": user.email
       }
+
     except Exception as e:
         db.rollback()
-        return JSONResponse(status_code = 500,content={
-            'detail': 'Something went wrong'
-        })
+        raise CustomException(status.HTTP_422_UNPROCESSABLE_CONTENT, 'Something went wrong')
 
 def createAccessToken(userId: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
@@ -46,9 +46,13 @@ def createAccessToken(userId: int) -> str:
 
 def userLogin(request, db):
    user = userRepo.getUserByEmail(db, request.email)
-   if not user or user.password != request.password:
-     raise HTTPException(
-         status_code=status.HTTP_401_UNAUTHORIZED,
-         detail="Incorrect email or password",
-     )
+
+   if user is None:
+        raise CustomException(status.HTTP_401_UNAUTHORIZED, 'Incorrect email or password')
+
+   check = user.verify_password_hash(request.password)
+
+   if not check:
+        raise CustomException(status.HTTP_401_UNAUTHORIZED, 'Incorrect email or password')
+
    return createAccessToken(user.id)

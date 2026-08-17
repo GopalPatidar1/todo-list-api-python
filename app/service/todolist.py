@@ -2,6 +2,7 @@ from app.repositories.todolist import addTodo, getTodolist as fetchTodo, deleteT
 from app.models.todo_list import TodoList
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from app.core.customException import CustomException
 
 def addTodoItem(db: Session, todoData, userId: int):
     try:
@@ -22,15 +23,23 @@ def addTodoItem(db: Session, todoData, userId: int):
       }
     except Exception as e:
         db.rollback()
-        return JSONResponse(status_code = 500,content={
-            'detail': 'Something went wrong'
-        })
+        raise CustomException(500, "Something went wrong") 
 
 def getTodolist(userId: str, db:Session, limit: int, nextCursor: int|None):
    return  fetchTodo(db=db, userId=userId, limit=limit, nextCursor=nextCursor)
 
 def deleteTodoItem(db: Session, userId: str, todoId: str):
-   return deleteTodo(db=db, userId=userId, todoId=todoId)
+   result = deleteTodo(db=db, userId=userId, todoId=todoId)
+   if result.rowcount == 0:
+      raise CustomException(404,"Todo not found") 
+   
+   return {
+       'success': True
+   }
 
 def updateTodo(db:Session, todoId:str, userId: str, data,):
-   return updateTodoItem(db=db, todoId=todoId, userId=userId, data=data)
+   result =  updateTodoItem(db=db, todoId=todoId, userId=userId, data=data)
+
+   if result is None:
+      raise CustomException(404,"Todo not found") 
+   return result
