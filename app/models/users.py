@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import String, DateTime, func, Enum as SQLEnum
+from sqlalchemy import String, DateTime, func, Enum as SQLEnum, Integer
 from sqlalchemy.orm import DeclarativeBase ,Mapped, mapped_column, relationship
 from app.config.database import Base
 import bcrypt
@@ -16,6 +16,7 @@ class User(Base):
     firstname: Mapped[str] = mapped_column(String(30), nullable=False)
     lastname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     email: Mapped[str] = mapped_column(String(255), index=True, nullable=False, unique=True)
+    age: Mapped[int | None]= mapped_column(Integer, nullable=True)
 
     password_hash: Mapped[str] = mapped_column(
         "password",
