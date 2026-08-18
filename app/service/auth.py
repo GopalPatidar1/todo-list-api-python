@@ -7,7 +7,7 @@ from app.config.secretes import secretes
 from app.core.customException import CustomException
 import jwt
 
-def registerUser(request, db):
+async def registerUser(request, db):
     try:
       user = User(
           firstname=request.firstname,
@@ -16,10 +16,10 @@ def registerUser(request, db):
           password=request.password
       )
       
-      userRepo.createUser(db, user)
+      await userRepo.createUser(db, user)
 
-      db.commit()
-      db.refresh(user)
+      await db.commit()
+      await db.refresh(user)
       
       return {
           "id": user.id,
@@ -28,7 +28,7 @@ def registerUser(request, db):
       }
 
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise CustomException(status.HTTP_422_UNPROCESSABLE_CONTENT, 'Something went wrong')
 
 def createAccessToken(userId: int) -> str:
@@ -44,8 +44,8 @@ def createAccessToken(userId: int) -> str:
         algorithm=secretes.JWT_ALGORITHM
     )
 
-def userLogin(request, db):
-   user = userRepo.getUserByEmail(db, request.email)
+async def userLogin(request, db):
+   user = await userRepo.getUserByEmail(db, request.email)
 
    if user is None:
         raise CustomException(status.HTTP_401_UNAUTHORIZED, 'Incorrect email or password')

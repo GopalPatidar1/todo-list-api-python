@@ -1,39 +1,35 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase
+
 from app.config.secretes import secretes
+
 
 if not secretes.DB_URL:
     raise RuntimeError("DB_URL environment variable is not set")
 
+
 class Base(DeclarativeBase):
     pass
 
-engine = create_engine(
+
+engine = create_async_engine(
     secretes.DB_URL,
     pool_pre_ping=True,
 )
 
 
-SessionLocal = sessionmaker(
+SessionLocal = async_sessionmaker(
     bind=engine,
+    class_=AsyncSession,
     autoflush=False,
-    autocommit=False,
+    expire_on_commit=False,
 )
 
 
-def get_db():
-    db = SessionLocal()
-    try:
+async def get_db():
+    async with SessionLocal() as db:
         yield db
-    finally:
-        db.close()
-
-
-try:
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-
-    print("Database connected!")
-
-except Exception as e:
-    print(f"Database connection failed: {e}")

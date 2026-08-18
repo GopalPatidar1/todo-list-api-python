@@ -7,12 +7,19 @@ import app.models
 from app.config.secretes import secretes
 import jwt
 from app.core.customException import CustomException
-Base.metadata.create_all(bind=engine)
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()
 
 JWT_SECRET_KEY = secretes.JWT_SECRET_KEY
 JWT_ALGORITHM = secretes.JWT_ALGORITHM
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.middleware("http")
 async def validateAuth(request, call_next):
@@ -49,9 +56,15 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(todolist.router)
 
+import anyio
+import anyio.to_thread
+limiter = anyio.to_thread.current_default_thread_limiter()
+print("🚀 ~ limiter:", limiter.total_tokens)
+print("🚀 ~ limiter:", limiter.borrowed_tokens)
 
-@app.get("/")
+@app.get("/health")
 async def read_root():
+    await anyio.sleep(2)
     return {
         'Hello': 'World'
     }

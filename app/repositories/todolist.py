@@ -1,20 +1,20 @@
 from sqlalchemy import select, delete, update
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 from app.models.todo_list import TodoList
 from app.models.users import User
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
-def addTodo(db:Session, todo):
+async def addTodo(db:AsyncSession, todo):
     db.add(todo)
-    db.flush()
+    await db.flush()
 
-def getTodolist(db: Session, userId: str, nextCursor: int | None, limit:int):
+async def getTodolist(db: AsyncSession, userId: str, nextCursor: int | None, limit:int):
     filterRec = [TodoList.user_id == int(userId)]
 
     if nextCursor is not None:
         filterRec.append(TodoList.id <= nextCursor)
         # join() / outerjoin() control the SQL rows you query; selectinload() controls how SQLAlchemy loads related objects.
-    result =  db.scalars(
+    result = await db.scalars(
         select(TodoList)
         # // Used to eagerly load a related object/relationship using a separate SQL query, so accessing the relationship does not cause additional queries for each record.
         .options(selectinload(TodoList.user)) 
@@ -25,24 +25,26 @@ def getTodolist(db: Session, userId: str, nextCursor: int | None, limit:int):
         .where(*filterRec)
         .order_by(TodoList.id.desc())
         .limit(limit+1)
-    ).all()
+    )
+    result = result.all()
+
     nextCursor = result[-1].id if result else None
     availNext = len(result) > limit
 
     return {"nextCursor": nextCursor, "availNext":availNext ,"result": result[:limit]}
 
-def deleteTodo(todoId: str, userId: str, db: Session):
-    result = db.execute(delete(TodoList).where(
+async def deleteTodo(todoId: str, userId: str, db: AsyncSession):
+    result = await db.execute(delete(TodoList).where(
         TodoList.user_id == int(userId),
         TodoList.id == int(todoId)
     ))
 
-    db.commit()
+    await db.commit()
 
     return result
 
-def updateTodoItem(db:Session, todoId:str, userId: str, data):
-     result = db.execute(
+async def updateTodoItem(db: AsyncSession, todoId:str, userId: str, data):
+     result = await db.execute(
         update(TodoList)
         .where(
             TodoList.id == int(todoId),
@@ -52,6 +54,6 @@ def updateTodoItem(db:Session, todoId:str, userId: str, data):
         .returning(TodoList)
        )
 
-     db.commit()
+     await db.commit()
 
      return result.scalar_one_or_none()
