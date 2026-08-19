@@ -56,15 +56,15 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(todolist.router)
 
-import anyio
-import anyio.to_thread
-limiter = anyio.to_thread.current_default_thread_limiter()
-print("🚀 ~ limiter:", limiter.total_tokens)
-print("🚀 ~ limiter:", limiter.borrowed_tokens)
+# import anyio
+# import anyio.to_thread
+# limiter = anyio.to_thread.current_default_thread_limiter()
+# print("🚀 ~ limiter:", limiter.total_tokens)
+# print("🚀 ~ limiter:", limiter.borrowed_tokens)
 
 @app.get("/health")
 async def read_root():
-    await anyio.sleep(2)
+    # await anyio.sleep(2)
     return {
         'Hello': 'World'
     }

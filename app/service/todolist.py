@@ -3,6 +3,8 @@ from app.models.todo_list import TodoList
 from fastapi.responses import JSONResponse
 from app.core.customException import CustomException
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.background.notification import sendTodoUpdatenotification
+import asyncio
 
 async def addTodoItem(db: AsyncSession, todoData, userId: int):
     try:
@@ -16,6 +18,8 @@ async def addTodoItem(db: AsyncSession, todoData, userId: int):
 
       await db.commit()
       await db.refresh(todo)
+
+      asyncio.create_task(sendTodoUpdatenotification(todo.id, "todoupdated"))
       
       return {
           "id": todo.id,

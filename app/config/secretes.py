@@ -4,10 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     DB_URL: str
     DB_URL_SYNC: str
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_PORT: str
-    
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
