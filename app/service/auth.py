@@ -32,10 +32,7 @@ async def registerUser(request, db):
         raise CustomException(status.HTTP_422_UNPROCESSABLE_CONTENT, 'Something went wrong')
 
 def createAccessToken(userId: int) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=int(secretes.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-
+    expire = datetime.now(timezone.utc) + timedelta(minutes=secretes.ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = { "userId": str(userId), "exp": expire }
 
     return jwt.encode(
@@ -44,7 +41,7 @@ def createAccessToken(userId: int) -> str:
         algorithm=secretes.JWT_ALGORITHM
     )
 
-async def userLogin(request, db):
+async def userLogin(request, db) -> str:
    user = await userRepo.getUserByEmail(db, request.email)
 
    if user is None:

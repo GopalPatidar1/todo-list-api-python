@@ -30,10 +30,10 @@ async def addTodoItem(db: AsyncSession, todoData, userId: int):
         print(f"Error creating todo: {e}")
         raise CustomException(500, "Something went wrong") 
 
-async def getTodolist(userId: str, db: AsyncSession, limit: int, nextCursor: int|None):
+async def getTodolist(userId: int, db: AsyncSession, limit: int, nextCursor: int|None):
    return  await fetchTodo(db=db, userId=userId, limit=limit, nextCursor=nextCursor)
 
-async def deleteTodoItem(db: AsyncSession, userId: str, todoId: str):
+async def deleteTodoItem(db: AsyncSession, userId: int, todoId: int):
    result = await deleteTodo(db=db, userId=userId, todoId=todoId)
    if result.rowcount == 0:
       raise CustomException(404,"Todo not found") 
@@ -42,7 +42,7 @@ async def deleteTodoItem(db: AsyncSession, userId: str, todoId: str):
       'success': True
    }
 
-async def updateTodo(db: AsyncSession, todoId:str, userId: str, data,):
+async def updateTodo(db: AsyncSession, todoId: int, userId: int, data,):
    result = await updateTodoItem(db=db, todoId=todoId, userId=userId, data=data)
 
    if result is None:

@@ -9,7 +9,7 @@ async def addTodo(db:AsyncSession, todo):
     await db.flush()
 
 async def getTodolist(db: AsyncSession, userId: str, nextCursor: int | None, limit:int):
-    filterRec = [TodoList.user_id == int(userId)]
+    filterRec = [TodoList.user_id == userId]
 
     if nextCursor is not None:
         filterRec.append(TodoList.id <= nextCursor)
@@ -33,22 +33,22 @@ async def getTodolist(db: AsyncSession, userId: str, nextCursor: int | None, lim
 
     return {"nextCursor": nextCursor, "availNext":availNext ,"result": result[:limit]}
 
-async def deleteTodo(todoId: str, userId: str, db: AsyncSession):
+async def deleteTodo(todoId: int, userId: int, db: AsyncSession):
     result = await db.execute(delete(TodoList).where(
-        TodoList.user_id == int(userId),
-        TodoList.id == int(todoId)
+        TodoList.user_id == userId,
+        TodoList.id == todoId
     ))
 
     await db.commit()
 
     return result
 
-async def updateTodoItem(db: AsyncSession, todoId:str, userId: str, data):
+async def updateTodoItem(db: AsyncSession, todoId:int, userId: int, data):
      result = await db.execute(
         update(TodoList)
         .where(
-            TodoList.id == int(todoId),
-            TodoList.user_id == int(userId)
+            TodoList.id == todoId,
+            TodoList.user_id == userId
         )
         .values(**data.model_dump(exclude_unset=True))
         .returning(TodoList)

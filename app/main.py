@@ -37,8 +37,8 @@ async def validateAuth(request, call_next):
         if auth_header and auth_header.startswith("Bearer "):
            try: 
               encoded_jwt = auth_header.split(" ", 1)[1]
-              decodeJwt=jwt.decode(encoded_jwt, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-              request.state.userId= decodeJwt["userId"]
+              decodeJwt = jwt.decode(encoded_jwt, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+              request.state.userId = int(decodeJwt["userId"])
            except:
                return JSONResponse(status_code=401, content={
                    'detail': 'Token Expired'

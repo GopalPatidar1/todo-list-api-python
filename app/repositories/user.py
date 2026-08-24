@@ -6,12 +6,12 @@ async def createUser(db: AsyncSession, user):
    db.add(user)
    await db.flush()
 
-async def getUserByEmail(db: AsyncSession , email:str):
+async def getUserByEmail(db: AsyncSession , email: str):
      return await db.scalar(
         select(User).where(User.email == email)
     )
 
-async def getUserById(db: AsyncSession, id: str):
+async def getUserById(db: AsyncSession, id: int):
      return await db.scalar(
-          select(User).where(User.id == int(id))
+          select(User).where(User.id == id)
      )
